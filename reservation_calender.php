@@ -1,3 +1,82 @@
+<?php
+    //名前が送信されたら以下の処理を行う
+    //この部分は変更してもいい
+if(isset($_POST['name'])) {
+    //「予約フォーム」からの情報をそれぞれ変数に格納しておく↓
+    $name=htmlspecialchars($_POST['name'], ENT_QUOTES);
+    $number=htmlspecialchars($_POST['number'], ENT_QUOTES);
+    $member=htmlspecialchars($_POST['member'], ENT_QUOTES);
+    $day=htmlspecialchars($_POST['day'], ENT_QUOTES);
+    //DBに接続するために必要な情報
+    $dsn="mysql:host=localhost:8889;dbname=test;charset=utf8_general_ci";
+    //アクセス権があるユーザー
+    $user="hogeUser";
+    $pass="hogehoge";
+
+
+    try {
+        //PDOでSQL文を即時実行するときに、1回しか使わないならqueryを使用する
+        $db = new PDO($dsn, $user, $pass, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        //queryオブジェクトは、DBから情報を取ってきて、phpで出力（画面に表示したりするのに使用する）
+        //INSERTでDBに値を登録する。INSERT INTO テーブル名 (カラム名1, カラム名2, ・・・) VALUES (値1, 値2, ・・・);
+        //banという箇所はまだテーブルにない。これから追加したいのでNULLを追加してる。
+        $db->query("INSERT INTO sample(`name`,`number`,member,day) VALUES('$name', '$number', '$member', '$day')");
+        echo $name;
+    }catch(Exception $e) {
+        //PHP_EOLは自動で改行してくれるやつ
+        echo $e->getMessage() . PHP_EOL;
+    }
+    header("Location: reservation_form.php");
+    //"reservation_form.php（予約フォームがあったページ）"にリダイレクトする。  exitで次の処理に進まないようにストップしてる。
+    exit;
+}
+//予約された日の予約人数を取得する関数
+function getreservation() {
+    $dsn="mysql:host=localhost;dbname=test;charset=utf8";
+    $user="hogeUser";
+    $pass="hogehoge";
+    $db  = new PDO($dsn, $user, $pass);
+    //予約された情報がここに入る
+    $ps = $db->query("SELECT * FROM sample");
+    $reservation_member = array();
+
+    foreach($ps as $out) {
+        //予約された全ての日付情報を文字列として$day_outへ格納
+        //例：echo $day_out; → 2021-01-23
+        $day_out = strtotime((string) $out['day']);
+        //予約された全ての日のそれぞれの人数を文字列として$member_outへ格納
+        //例：echo $member_out; → 3
+        $member_out = (string) $out['member'];
+        //$day_outで取得した日付をもとにそれぞれの予約人数を$reservation_memberへ格納。キーと値の形になる。
+        //例：echo $reservation_member; → [2021-01-23]=>3
+        $reservation_member[date('Y-m-d', $day_out)] = $member_out;
+    }
+    //日付の古い順に並び替える
+    ksort($reservation_member);
+    return $reservation_member;
+}
+
+$reservation_array = getreservation();
+//カレンダーの日付と予約された日付を照合する関数
+function reservation($date, $reservation_array) {
+//array_key_exists ( $カレンダーの日付 , $予約された日 )$reservation_arrayの中に$dateが存在するかどうか
+if(array_key_exists($date, $reservation_array)) {
+    if($reservation_array[$date] >= 10) {
+        //予約人数が１０人以上の場合は以下を実行する
+        $reservation_member = "<br>" . "<span class='green'>"."予約できません"."</span>";
+        return $reservation_member;
+    }else{//例：echo $reservation_member; → ３人
+        $reservation_member = "<br>" . "<span class='green'>".$reservation_array[$date]."人"."</span>";
+        return $reservation_member;
+    }
+
+}
+}
+
+?>
+
+
 <?php /* 祝日プログラム */ ?>
 <?php
 //GoogleカレンダーAPIから祝日を取得
