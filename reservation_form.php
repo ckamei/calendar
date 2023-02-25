@@ -7,9 +7,9 @@
 <body>
     <form action="reservation_calender.php" method="post" >
         お名前
-        <div><input type="text" name="name" palceholder="山田太郎"></div>
+        <div><input type="text" name="name" placeholder="山田太郎"></div>
         電話番号
-        <div><input type="tel" name="number" palceholder="08012349876"></div>
+        <div><input type="tel" name="number" placeholder="08012349876"></div>
         人数
         <div><input name="member"></div>
         日付

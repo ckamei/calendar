@@ -1,14 +1,22 @@
 <?php
+//echo $_POST['number'].'<br>';
+//echo $_POST['member'].'<br>';
+//echo $_POST['namdaye'].'<br>';
+
+?>
+<?php
     //名前が送信されたら以下の処理を行う
     //この部分は変更してもいい
-if(isset($_POST['name'])) {
+    if(isset($_POST['number'])) {
+
     //「予約フォーム」からの情報をそれぞれ変数に格納しておく↓
     $name=htmlspecialchars($_POST['name'], ENT_QUOTES);
     $number=htmlspecialchars($_POST['number'], ENT_QUOTES);
     $member=htmlspecialchars($_POST['member'], ENT_QUOTES);
     $day=htmlspecialchars($_POST['day'], ENT_QUOTES);
     //DBに接続するために必要な情報
-    $dsn="mysql:host=localhost:8889;dbname=test;charset=utf8_general_ci";
+    //$dsn="mysql:dbname=test;host=localhost:8889;charset=utf8_general_ci";
+    $dsn="mysql:host=localhost;dbname=test;charset=utf8";
     //アクセス権があるユーザー
     $user="hogeUser";
     $pass="hogehoge";
@@ -21,15 +29,19 @@ if(isset($_POST['name'])) {
         //queryオブジェクトは、DBから情報を取ってきて、phpで出力（画面に表示したりするのに使用する）
         //INSERTでDBに値を登録する。INSERT INTO テーブル名 (カラム名1, カラム名2, ・・・) VALUES (値1, 値2, ・・・);
         //banという箇所はまだテーブルにない。これから追加したいのでNULLを追加してる。
-        $db->query("INSERT INTO sample(`name`,`number`,member,day) VALUES('$name', '$number', '$member', '$day')");
-        echo $name;
+        $db->query("INSERT INTO sample(name,number,member,day) VALUES('$name', '$number', '$member', '$day')");
+        //$db->query("INSERT INTO sample(name,number,member,day) VALUES('test3', '111', 4, '2023-02-24')");
+        
     }catch(Exception $e) {
         //PHP_EOLは自動で改行してくれるやつ
         echo $e->getMessage() . PHP_EOL;
     }
-    header("Location: reservation_form.php");
+    //ここはリダイレクトされちゃうので一旦なし。
+    //header("Location: reservation_form.php");
     //"reservation_form.php（予約フォームがあったページ）"にリダイレクトする。  exitで次の処理に進まないようにストップしてる。
-    exit;
+    //exit;
+}else {
+    echo "if文失敗";
 }
 //予約された日の予約人数を取得する関数
 function getreservation() {
